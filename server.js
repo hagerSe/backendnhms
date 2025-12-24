@@ -1,23 +1,24 @@
+require('dotenv').config(); // load .env once
 const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-require('dotenv').config(); // load .env
-const authRoutes = require('./auth'); // JWT code
-require('dotenv').config();
+const authRoutes = require('./auth'); // make sure auth.js exports router
 
 const app = express(); // only once
+
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.json()); // keep for JWT routes
+app.use(express.json());
 app.use('/api', authRoutes); // JWT routes
 
 // MySQL connection
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "root", // your MySQL password
-  database: "NHMS",
+  host: process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "root",
+  database: process.env.DB_NAME || "NHMS",
 });
 
 db.connect((err) => {
