@@ -2,10 +2,15 @@ const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+require('dotenv').config(); // load .env
+const authRoutes = require('./auth'); // JWT code
+require('dotenv').config();
 
-const app = express();
+const app = express(); // only once
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.json()); // keep for JWT routes
+app.use('/api', authRoutes); // JWT routes
 
 // MySQL connection
 const db = mysql.createConnection({
@@ -68,8 +73,9 @@ app.get("/patients", (req, res) => {
     res.json(results);
   });
 });
+
 // =========================
-//  VITAL SIGNS ENDPOINTS
+// VITAL SIGNS ENDPOINTS
 // =========================
 
 // GET vitals (all or by specific userid)
@@ -95,7 +101,6 @@ app.get("/vital_signs", (req, res) => {
       return res.status(500).json({ error: err.message });
     }
 
-    // Parse JSON vitals correctly
     const parsedResults = results.map(row => ({
       ...row,
       vitals:
@@ -107,7 +112,6 @@ app.get("/vital_signs", (req, res) => {
     res.json(parsedResults);
   });
 });
-
 
 // POST — Save vitals for a patient
 app.post("/vital_signs", (req, res) => {
@@ -147,7 +151,6 @@ app.post("/vital_signs", (req, res) => {
   );
 });
 
-
-
-// Start server (must be LAST)
-app.listen(5000, () => console.log("Server running on port 5000"));
+// Start server (only once)
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
